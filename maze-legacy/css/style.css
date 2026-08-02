@@ -1,0 +1,257 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-dark: #0d1117;
+  --bg-panel: #161b22;
+  --accent: #58a6ff;
+  --accent-glow: #79c0ff;
+  --gold: #e3b341;
+  --wall: #21262d;
+  --wall-edge: #30363d;
+  --path: #0d1117;
+  --player: #3fb950;
+  --exit: #f85149;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --font-pixel: 'Press Start 2P', monospace;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-pixel);
+  background: var(--bg-dark);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(88, 166, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(227, 179, 65, 0.05) 0%, transparent 50%);
+}
+
+#app {
+  width: 100%;
+  max-width: 960px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(227, 179, 65, 0.4);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.subtitle {
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.game-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+  justify-items: center;
+}
+
+@media (min-width: 768px) {
+  .game-container {
+    grid-template-columns: 120px 1fr 120px;
+  }
+}
+
+.hud {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .hud {
+    flex-direction: column;
+    width: auto;
+  }
+}
+
+.hud-panel {
+  background: var(--bg-panel);
+  border: 2px solid var(--wall-edge);
+  padding: 0.75rem;
+  text-align: center;
+  min-width: 90px;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.45rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.hud-value {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--accent-glow);
+}
+
+.track-name {
+  font-size: 0.5rem;
+  color: var(--gold);
+  line-height: 1.6;
+}
+
+.hud-panel-wide {
+  min-width: 110px;
+}
+
+.canvas-wrapper {
+  position: relative;
+  border: 3px solid var(--wall-edge);
+  box-shadow:
+    0 0 0 1px var(--bg-dark),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 0 60px rgba(0, 0, 0, 0.3);
+}
+
+#game-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 17, 23, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 90%;
+}
+
+.overlay-content h2 {
+  font-size: clamp(0.8rem, 3vw, 1.1rem);
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.overlay-content p {
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  line-height: 2;
+  margin-bottom: 1.5rem;
+}
+
+.btn {
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  padding: 0.875rem 1.5rem;
+  background: var(--accent);
+  color: var(--bg-dark);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 4px 0 #1f6feb;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #1f6feb;
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1f6feb;
+}
+
+.controls-hint {
+  font-size: 0.45rem;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 2.2;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .controls-hint {
+    display: block;
+  }
+}
+
+kbd {
+  display: inline-block;
+  background: var(--bg-panel);
+  border: 1px solid var(--wall-edge);
+  padding: 0.15rem 0.35rem;
+  margin: 0 0.1rem;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+}
+
+.footer {
+  text-align: center;
+}
+
+.footer p {
+  font-size: 0.4rem;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.music-btn {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-panel);
+  color: var(--accent-glow);
+  border: 2px solid var(--wall-edge);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.music-btn:hover {
+  border-color: var(--accent);
+  color: var(--gold);
+}
+
+.music-btn.muted {
+  color: var(--text-dim);
+  border-color: var(--wall);
+}
