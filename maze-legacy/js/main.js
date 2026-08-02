@@ -25,7 +25,7 @@ const music = new AdventureMusic();
 
 function updateTrackLabel(level = game.level) {
   music.loadLevel(level);
-  hud.trackName.textContent = music.getTrackName();
+  hud.trackName.textContent = `Fase ${level}: ${music.getTrackName()}`;
 }
 
 async function ensureMusic(level = 1) {
@@ -60,7 +60,7 @@ function hideOverlay() {
 function showStartScreen() {
   showOverlay(
     'Maze Legacy',
-    'Navegue pelo labirinto até a saída vermelha.\nCada nível é maior e o tempo mais curto.\nUse WASD ou as setas do teclado.',
+    'Navegue pelo labirinto até a saída vermelha.\nCada fase tem labirinto, tempo e música únicos.\nUse WASD ou as setas do teclado.',
     'Começar',
     async () => {
       await ensureMusic(1);
@@ -76,7 +76,7 @@ game.onStateChange = (state) => {
     const timeStr = game.formatTime(state.elapsed);
     showOverlay(
       `Nível ${state.level} completo!`,
-      `Tempo: ${timeStr} · Passos: ${state.moves}\nPronto para o próximo desafio?`,
+      `Tempo: ${timeStr} · Passos: ${state.moves}\nNova música na próxima fase!`,
       'Próximo nível',
       () => {
         hideOverlay();

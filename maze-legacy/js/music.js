@@ -1,5 +1,5 @@
 /**
- * Trilhas sonoras de aventura por fase — estilo chiptune (Web Audio API).
+ * Trilhas sonoras de aventura — uma composição única por fase (Web Audio API).
  */
 
 const NOTES = {
@@ -11,6 +11,56 @@ const NOTES = {
 };
 
 const PITCHES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+const SCALES = {
+  minor: [0, 2, 3, 5, 7, 8, 10],
+  major: [0, 2, 4, 5, 7, 9, 11],
+  dorian: [0, 2, 3, 5, 7, 9, 10],
+  mixolydian: [0, 2, 4, 5, 7, 9, 10],
+  phrygian: [0, 1, 3, 5, 7, 8, 10],
+};
+
+const ROOTS = ['A', 'C', 'D', 'E', 'F', 'G'];
+
+const NAME_PREFIXES = [
+  'Alvorecer', 'Floresta', 'Caverna', 'Montanha', 'Deserto', 'Rio',
+  'Ruínas', 'Tempestade', 'Abismo', 'Cristais', 'Vulcão', 'Legado',
+  'Névoa', 'Portal', 'Oásis', 'Fortaleza', 'Templo', 'Cânion',
+  'Maré', 'Eclipse', 'Aurora', 'Sombra', 'Horizonte', 'Labirinto',
+];
+
+const NAME_SUFFIXES = [
+  'Perdido', 'Antigo', 'Sagrado', 'Oculto', 'Eterno', 'Profundo',
+  'Distante', 'Místico', 'Selvagem', 'Dourado', 'Silencioso', 'Esquecido',
+  'Ascendente', 'Submerso', 'Flamejante', 'Gélido',
+];
+
+const MELODY_PATTERNS = [
+  [0, 2, 4, 2, 0, -1, -2, -1, 0, 2, 4, 5, 4, 2, 0, null],
+  [4, 2, 0, 2, 4, 5, 4, 2, 0, -1, 0, 2, 4, 4, 2, 0],
+  [0, 0, 2, 4, 5, 4, 2, 0, -2, -1, 0, 2, 3, 2, 0, null],
+  [2, 4, 5, 4, 2, 0, 2, 4, 5, 5, 4, 2, 0, -1, 0, 2],
+  [0, 2, 3, 5, 4, 3, 2, 0, 2, 4, 5, 4, 3, 2, 0, null],
+  [5, 4, 2, 0, 2, 4, 5, 4, 2, 0, -1, 0, 2, 4, 2, 0],
+  [0, 3, 5, 3, 0, 2, 4, 2, 0, -2, 0, 3, 5, 4, 2, 0],
+  [4, 5, 4, 2, 0, 2, 4, 5, 6, 5, 4, 2, 0, -1, -2, 0],
+];
+
+const BASS_PATTERNS = [
+  [0, 0, 3, 3, 4, 4, 0, 0, 5, 5, 3, 3, 4, 4, 0, 0],
+  [0, 0, 0, 4, 3, 3, 0, 0, 5, 5, 4, 4, 0, 0, 3, 3],
+  [0, null, 3, null, 4, null, 0, null, 5, null, 3, null, 0, null, 4, null],
+  [0, 0, 5, 5, 3, 3, 4, 4, 0, 0, 3, 3, 5, 5, 0, 0],
+];
+
+const CHORD_PROGRESSIONS = [
+  [0, 3, 4, 5],
+  [0, 4, 5, 3],
+  [0, 5, 3, 4],
+  [0, 3, 5, 4],
+  [0, 4, 3, 0],
+  [0, 5, 4, 0],
+];
 
 function noteToMidi(note) {
   if (!note) return null;
@@ -26,131 +76,84 @@ function midiToNote(midi) {
   return `${pitch}${octave}`;
 }
 
-function transpose(note, semitones) {
-  if (!note) return null;
-  return midiToNote(noteToMidi(note) + semitones);
-}
-
-function transposeTrack(track, semitones) {
-  const map = (arr) => arr.map((n) => transpose(n, semitones));
-  return {
-    ...track,
-    melody: map(track.melody),
-    harmony: map(track.harmony),
-    bass: map(track.bass),
-    arpeggio: track.arpeggio.map((chord) => map(chord)),
+function createRng(seed) {
+  let state = (seed * 16807 + 12345) % 2147483647;
+  return () => {
+    state = (state * 16807) % 2147483647;
+    return (state - 1) / 2147483646;
   };
 }
 
-const TRACKS = [
-  {
-    name: 'Alvorecer',
-    tempo: 94,
-    melody: ['E5', 'G5', 'A5', 'G5', 'E5', 'D5', 'C5', 'D5', 'E5', 'G5', 'A5', 'B5', 'A5', 'G5', 'E5', null],
-    harmony: ['C5', null, 'E5', null, 'G5', null, 'E5', null, 'C5', null, 'D5', null, 'B4', null, 'G4', null],
-    bass: ['A2', 'A2', 'C3', 'C3', 'G2', 'G2', 'F2', 'F2', 'A2', 'A2', 'E3', 'E3', 'D3', 'D3', 'A2', 'A2'],
-    arpeggio: [['A3', 'C4', 'E4', 'A4'], ['G3', 'B3', 'D4', 'G4'], ['F3', 'A3', 'C4', 'F4'], ['E3', 'G3', 'B3', 'E4']],
-  },
-  {
-    name: 'Floresta',
-    tempo: 102,
-    melody: ['D5', 'F5', 'G5', 'A5', 'G5', 'F5', 'D5', 'C5', 'D5', 'E5', 'G5', 'G5', 'A5', 'G5', 'F5', 'D5'],
-    harmony: [null, 'A4', null, 'F4', null, 'D4', null, 'A4', null, 'C5', null, 'G4', null, 'E4', null, 'D4'],
-    bass: ['D3', 'D3', 'G2', 'G2', 'A2', 'A2', 'D3', 'D3', 'G2', 'G2', 'C3', 'C3', 'A2', 'A2', 'D3', 'D3'],
-    arpeggio: [['D3', 'F3', 'A3', 'D4'], ['G3', 'B3', 'D4', 'G4'], ['A3', 'C4', 'E4', 'A4'], ['D3', 'F3', 'A3', 'D4']],
-  },
-  {
-    name: 'Caverna',
-    tempo: 108,
-    melody: ['A4', 'C5', 'D5', 'D5', 'C5', 'A4', 'G4', 'A4', 'C5', 'E5', 'D5', 'C5', 'A4', null, 'G4', 'A4'],
-    harmony: ['E4', null, 'G4', null, 'A4', null, 'E4', null, 'C5', null, 'G4', null, 'E4', null, 'C4', null],
-    bass: ['A2', 'A2', 'A2', 'E3', 'A2', 'A2', 'G2', 'G2', 'F2', 'F2', 'E3', 'E3', 'A2', 'A2', 'G2', 'A2'],
-    arpeggio: [['A2', 'E3', 'A3', 'C4'], ['A2', 'E3', 'G3', 'C4'], ['G2', 'D3', 'G3', 'B3'], ['A2', 'E3', 'A3', 'E4']],
-  },
-  {
-    name: 'Montanha',
-    tempo: 110,
-    melody: ['G4', 'C5', 'E5', 'G5', 'E5', 'C5', 'G4', 'E4', 'C5', 'D5', 'E5', 'G5', 'A5', 'G5', 'E5', 'C5'],
-    harmony: [null, 'E4', null, 'G4', null, 'C5', null, 'G4', null, 'A4', null, 'C5', null, 'E5', null, 'G4'],
-    bass: ['C3', 'C3', 'G2', 'G2', 'C3', 'C3', 'E3', 'E3', 'A2', 'A2', 'D3', 'D3', 'G2', 'G2', 'C3', 'C3'],
-    arpeggio: [['C3', 'E3', 'G3', 'C4'], ['G2', 'B2', 'D3', 'G3'], ['A2', 'C3', 'E3', 'A3'], ['C3', 'G3', 'C4', 'E4']],
-  },
-  {
-    name: 'Deserto',
-    tempo: 96,
-    melody: ['E5', null, 'D5', null, 'C5', 'D5', 'E5', null, 'G5', null, 'E5', null, 'D5', 'C5', 'B4', 'A4'],
-    harmony: [null, 'G4', null, 'F4', null, 'E4', null, 'G4', null, 'C5', null, 'B4', null, 'A4', null, 'G4'],
-    bass: ['A2', null, 'G2', null, 'F2', null, 'G2', null, 'C3', null, 'B2', null, 'A2', null, 'E2', null],
-    arpeggio: [['A3', 'C4', 'E4', 'G4'], ['G3', 'B3', 'D4', 'F4'], ['F3', 'A3', 'C4', 'E4'], ['E3', 'G3', 'B3', 'D4']],
-  },
-  {
-    name: 'Rio',
-    tempo: 118,
-    melody: ['C5', 'E5', 'G5', 'E5', 'C5', 'D5', 'E5', 'G5', 'A5', 'G5', 'E5', 'D5', 'C5', 'D5', 'E5', 'G5'],
-    harmony: ['G4', null, 'C5', null, 'E5', null, 'G4', null, 'E5', null, 'C5', null, 'G4', null, 'E4', null],
-    bass: ['C3', 'G2', 'C3', 'E3', 'A2', 'E3', 'A2', 'D3', 'G2', 'D3', 'G2', 'C3', 'F2', 'C3', 'G2', 'C3'],
-    arpeggio: [['C4', 'E4', 'G4', 'C5'], ['G3', 'B3', 'D4', 'G4'], ['A3', 'C4', 'E4', 'A4'], ['F3', 'A3', 'C4', 'F4']],
-  },
-  {
-    name: 'Ruínas',
-    tempo: 100,
-    melody: ['A4', 'B4', 'C5', 'E5', 'D5', 'C5', 'B4', 'A4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'D5', 'C5'],
-    harmony: [null, 'G4', null, 'A4', null, 'E4', null, 'C4', null, 'B3', null, 'G4', null, 'C5', null, 'A4'],
-    bass: ['A2', 'E3', 'A2', 'C3', 'G2', 'C3', 'G2', 'A2', 'E2', 'A2', 'E2', 'G2', 'C3', 'G2', 'F2', 'E2'],
-    arpeggio: [['A3', 'C4', 'E4', 'B4'], ['E3', 'G3', 'B3', 'E4'], ['C3', 'E3', 'G3', 'C4'], ['G3', 'B3', 'D4', 'G4']],
-  },
-  {
-    name: 'Tempestade',
-    tempo: 124,
-    melody: ['E5', 'E5', 'G5', 'A5', 'B5', 'A5', 'G5', 'E5', 'D5', 'E5', 'G5', 'B5', 'A5', 'G5', 'E5', 'D5'],
-    harmony: ['C5', 'C5', null, 'E5', null, 'G5', null, 'E5', 'C5', null, 'D5', null, 'B4', null, 'G4', 'F4'],
-    bass: ['A2', 'A2', 'C3', 'E3', 'A3', 'G2', 'F2', 'E2', 'D3', 'E3', 'G2', 'B2', 'A2', 'G2', 'F2', 'E2'],
-    arpeggio: [['A3', 'E4', 'A4', 'C5'], ['C4', 'E4', 'G4', 'C5'], ['G3', 'B3', 'D4', 'G4'], ['E3', 'B3', 'E4', 'G4']],
-  },
-  {
-    name: 'Abismo',
-    tempo: 112,
-    melody: ['G4', 'G4', 'A4', 'C5', 'D5', 'C5', 'A4', 'G4', 'F4', 'G4', 'A4', 'C5', 'D5', 'E5', 'D5', 'C5'],
-    harmony: ['E4', null, 'G4', null, 'A4', null, 'G4', null, 'F4', null, 'E4', null, 'C4', null, 'D4', null],
-    bass: ['G2', 'G2', 'C3', 'C3', 'D3', 'D3', 'G2', 'G2', 'F2', 'F2', 'E2', 'E2', 'C3', 'C3', 'G2', 'G2'],
-    arpeggio: [['G2', 'D3', 'G3', 'B3'], ['C3', 'G3', 'C4', 'E4'], ['D3', 'A3', 'D4', 'F4'], ['G2', 'B2', 'D3', 'G3']],
-  },
-  {
-    name: 'Cristais',
-    tempo: 116,
-    melody: ['E5', 'G5', 'B5', 'G5', 'E5', 'C6', 'B5', 'G5', 'E5', 'G5', 'A5', 'B5', 'C6', 'B5', 'A5', 'G5'],
-    harmony: [null, 'C5', null, 'D5', null, 'G5', null, 'E5', null, 'C5', null, 'E5', null, 'G5', null, 'B4'],
-    bass: ['C3', 'G2', 'C3', 'E3', 'G2', 'C3', 'E3', 'B2', 'A2', 'E3', 'A2', 'D3', 'G2', 'C3', 'G2', 'C3'],
-    arpeggio: [['C4', 'E4', 'G4', 'B4'], ['G3', 'B3', 'D4', 'G4'], ['A3', 'C4', 'E4', 'A4'], ['E3', 'G3', 'B3', 'E4']],
-  },
-  {
-    name: 'Vulcão',
-    tempo: 126,
-    melody: ['A4', 'C5', 'E5', 'A5', 'G5', 'E5', 'C5', 'A4', 'B4', 'D5', 'F5', 'A5', 'G5', 'F5', 'D5', 'B4'],
-    harmony: ['E4', 'E4', null, 'C5', null, 'G4', null, 'E4', 'F4', null, 'A4', null, 'G4', null, 'F4', 'D4'],
-    bass: ['A2', 'A2', 'E3', 'E3', 'A2', 'G2', 'F2', 'E2', 'B2', 'B2', 'F3', 'F3', 'G2', 'E2', 'D2', 'E2'],
-    arpeggio: [['A3', 'C4', 'E4', 'A4'], ['E3', 'G3', 'B3', 'E4'], ['F3', 'A3', 'C4', 'F4'], ['B2', 'D3', 'F3', 'A3']],
-  },
-  {
-    name: 'Legado',
-    tempo: 120,
-    melody: ['E5', 'G5', 'A5', 'B5', 'C6', 'B5', 'A5', 'G5', 'E5', 'G5', 'A5', 'G5', 'F5', 'E5', 'D5', 'E5'],
-    harmony: ['C5', null, 'E5', null, 'G5', null, 'E5', null, 'C5', null, 'D5', null, 'B4', null, 'G4', null],
-    bass: ['A2', 'C3', 'E3', 'A3', 'G2', 'B2', 'E3', 'A2', 'F2', 'A2', 'D3', 'G2', 'C3', 'E3', 'A2', 'A2'],
-    arpeggio: [['A3', 'C4', 'E4', 'A4'], ['F3', 'A3', 'C4', 'F4'], ['C3', 'E3', 'G3', 'C4'], ['G3', 'B3', 'D4', 'G4']],
-  },
-];
+function pick(rng, array) {
+  return array[Math.floor(rng() * array.length)];
+}
+
+function scaleDegreeToNote(rootMidi, scale, degree, octaveBase = 4) {
+  if (degree === null) return null;
+  const octaves = Math.floor(degree / scale.length);
+  const wrapped = ((degree % scale.length) + scale.length) % scale.length;
+  const midi = rootMidi + scale[wrapped] + (octaveBase - 4 + octaves) * 12;
+  return midiToNote(midi);
+}
+
+function buildChordNotes(rootMidi, scale, degree, octaveBase = 3) {
+  return [
+    scaleDegreeToNote(rootMidi, scale, degree, octaveBase),
+    scaleDegreeToNote(rootMidi, scale, degree + 2, octaveBase),
+    scaleDegreeToNote(rootMidi, scale, degree + 4, octaveBase),
+    scaleDegreeToNote(rootMidi, scale, degree + 4, octaveBase + 1),
+  ];
+}
+
+function shiftPattern(pattern, shift) {
+  return pattern.map((d) => (d === null ? null : d + shift));
+}
 
 export function getTrackForLevel(level) {
-  const index = (level - 1) % TRACKS.length;
-  const cycle = Math.floor((level - 1) / TRACKS.length);
-  const base = TRACKS[index];
-  const varied = cycle > 0 ? transposeTrack(base, cycle * 2) : base;
+  const rng = createRng(level * 9973 + 42);
+  const root = pick(rng, ROOTS);
+  const scaleName = pick(rng, Object.keys(SCALES));
+  const scale = SCALES[scaleName];
+  const rootMidi = noteToMidi(`${root}3`);
+
+  const melodyPattern = pick(rng, MELODY_PATTERNS);
+  const bassPattern = pick(rng, BASS_PATTERNS);
+  const progression = pick(rng, CHORD_PROGRESSIONS);
+  const patternShift = Math.floor(rng() * 3) - 1;
+
+  const shiftedMelody = shiftPattern(melodyPattern, patternShift);
+  const melody = shiftedMelody.map((deg) =>
+    scaleDegreeToNote(rootMidi, scale, deg, 5)
+  );
+
+  const harmony = shiftedMelody.map((deg, i) => {
+    if (deg === null || rng() < 0.35) return null;
+    return scaleDegreeToNote(rootMidi, scale, deg - 2, 4);
+  });
+
+  const bass = bassPattern.map((deg) =>
+    deg === null ? null : scaleDegreeToNote(rootMidi, scale, deg, 2)
+  );
+
+  const arpeggio = progression.map((chordDeg) =>
+    buildChordNotes(rootMidi, scale, chordDeg, 3)
+  );
+
+  const tempo = 90 + ((level * 7 + Math.floor(rng() * 12)) % 38);
+
+  const prefix = NAME_PREFIXES[(level - 1) % NAME_PREFIXES.length];
+  const suffix = NAME_SUFFIXES[Math.floor(rng() * NAME_SUFFIXES.length)];
+  const name = level <= NAME_PREFIXES.length
+    ? prefix
+    : `${prefix} ${suffix}`;
 
   return {
-    ...varied,
-    name: cycle > 0 ? `${base.name} II` : base.name,
-    tempo: Math.min(varied.tempo + cycle * 3, 140),
+    name,
+    tempo,
+    melody,
+    harmony,
+    bass,
+    arpeggio,
     level,
   };
 }
