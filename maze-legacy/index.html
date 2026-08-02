@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maze Legacy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <h1 class="title">Maze Legacy</h1>
+      <p class="subtitle">Encontre a saída antes que o tempo acabe</p>
+    </header>
+
+    <main class="game-container">
+      <aside class="hud">
+        <div class="hud-panel">
+          <span class="hud-label">Nível</span>
+          <span id="level" class="hud-value">1</span>
+        </div>
+        <div class="hud-panel">
+          <span class="hud-label">Tempo</span>
+          <span id="timer" class="hud-value">0:00</span>
+        </div>
+        <div class="hud-panel">
+          <span class="hud-label">Passos</span>
+          <span id="moves" class="hud-value">0</span>
+        </div>
+        <div class="hud-panel">
+          <span class="hud-label">Melhor</span>
+          <span id="best" class="hud-value">—</span>
+        </div>
+      </aside>
+
+      <div class="canvas-wrapper">
+        <canvas id="game-canvas" width="640" height="640"></canvas>
+        <div id="overlay" class="overlay hidden">
+          <div class="overlay-content">
+            <h2 id="overlay-title">Maze Legacy</h2>
+            <p id="overlay-message">Use WASD ou setas para mover</p>
+            <button id="overlay-btn" class="btn">Jogar</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="controls-hint">
+        <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou setas</p>
+        <p><kbd>R</kbd> reiniciar nível</p>
+        <p><kbd>N</kbd> novo labirinto</p>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <p>Um labirinto gerado proceduralmente · Cada partida é única</p>
+    </footer>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
