@@ -17,15 +17,28 @@ const hud = {
   timer: document.getElementById('timer'),
   moves: document.getElementById('moves'),
   best: document.getElementById('best'),
+  trackName: document.getElementById('track-name'),
 };
 
 const game = new Game(canvas, hud);
 const music = new AdventureMusic();
 
-async function ensureMusic() {
-  await music.init();
-  if (!music.isMuted()) music.start();
+function updateTrackLabel(level = game.level) {
+  music.loadLevel(level);
+  hud.trackName.textContent = music.getTrackName();
 }
+
+async function ensureMusic(level = 1) {
+  await music.init();
+  updateTrackLabel(level);
+}
+
+game.onLevelStart = (level) => {
+  updateTrackLabel(level);
+  if (!music.isMuted() && music.ctx) {
+    music.startLevel(level);
+  }
+};
 
 function updateMusicButton() {
   musicToggle.textContent = music.isMuted() ? '♪ Mudo' : '♪ Música';
@@ -50,7 +63,7 @@ function showStartScreen() {
     'Navegue pelo labirinto até a saída vermelha.\nCada nível é maior e o tempo mais curto.\nUse WASD ou as setas do teclado.',
     'Começar',
     async () => {
-      await ensureMusic();
+      await ensureMusic(1);
       hideOverlay();
       game.startLevel(1);
     }
@@ -102,7 +115,7 @@ function loop(now) {
 musicToggle.addEventListener('click', async () => {
   await music.init();
   const muted = music.toggleMute();
-  if (!muted && !music.playing) music.start();
+  if (!muted) music.start(game.level);
   updateMusicButton();
 });
 

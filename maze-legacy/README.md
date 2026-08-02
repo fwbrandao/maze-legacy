@@ -36,6 +36,7 @@ Depois acesse http://localhost:8080
 - Recorde salvo por nível no navegador (localStorage)
 - Névoa parcial — só vê áreas próximas ao jogador
 - Trilha sonora de aventura em estilo chiptune (Web Audio API)
+- **Música diferente em cada fase** — 12 trilhas únicas com nomes temáticos
 - Fanfarra de vitória e som de derrota
 - Botão para ligar/desligar a música
 

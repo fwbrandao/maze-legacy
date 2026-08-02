@@ -26,6 +26,7 @@ export class Game {
     this.offsetY = 0;
     this.lastTick = 0;
     this.onStateChange = null;
+    this.onLevelStart = null;
   }
 
   loadBest() {
@@ -69,6 +70,9 @@ export class Game {
     this.calculateLayout();
     this.updateHud();
     this.render();
+    if (this.onLevelStart) {
+      this.onLevelStart(this.level);
+    }
     this.notifyState();
   }
 
