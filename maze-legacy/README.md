@@ -35,6 +35,9 @@ Depois acesse http://localhost:8080
 - Contador de passos e cronômetro regressivo
 - Recorde salvo por nível no navegador (localStorage)
 - Névoa parcial — só vê áreas próximas ao jogador
+- Trilha sonora de aventura em estilo chiptune (Web Audio API)
+- Fanfarra de vitória e som de derrota
+- Botão para ligar/desligar a música
 
 ## Estrutura
 
@@ -46,6 +49,7 @@ maze-legacy/
     ├── main.js     # Entrada e UI
     ├── game.js     # Lógica do jogo
     └── maze.js     # Geração de labirintos
+    └── music.js    # Trilha sonora de aventura
 ```
 
 ## Tecnologias

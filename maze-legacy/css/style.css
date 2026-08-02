@@ -223,3 +223,25 @@ kbd {
   color: var(--text-dim);
   line-height: 1.8;
 }
+
+.music-btn {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-panel);
+  color: var(--accent-glow);
+  border: 2px solid var(--wall-edge);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.music-btn:hover {
+  border-color: var(--accent);
+  color: var(--gold);
+}
+
+.music-btn.muted {
+  color: var(--text-dim);
+  border-color: var(--wall);
+}
